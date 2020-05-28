@@ -1,6 +1,25 @@
-document.addEventListener('DOMContentLoaded', function contentLoaded() {
-  let ticketPrefix = '';
-  let baseUrl = '';
+let ticketPrefix = '';
+let baseUrl = '';
+
+function contentLoaded() {
+  getValuesFromStorage();
+
+  const button = document.getElementById('go');
+  const jiraText = document.getElementById('jira');
+
+  button.addEventListener('click', () => buttonClicked(jiraText.value), false);
+  jiraText.addEventListener('keypress', checkEnter, false);
+  jiraText.focus();
+
+  function checkEnter(e) {
+    var keyCode = e.keyCode;
+    if (keyCode === 13) {
+      buttonClicked(jiraText.value);
+    }
+  }
+}
+
+function getValuesFromStorage() {
   chrome.storage.sync.get(
     {
       url: '',
@@ -11,25 +30,9 @@ document.addEventListener('DOMContentLoaded', function contentLoaded() {
       ticketPrefix = items.prefix;
     }
   );
+}
 
-  const button = document.getElementById('go');
-  const jiraText = document.getElementById('jira');
-  button.addEventListener(
-    'click',
-    () => buttonClicked(jiraText.value, ticketPrefix, baseUrl),
-    false
-  );
-  jiraText.addEventListener('keypress', checkEnter, false);
-  jiraText.focus();
-  function checkEnter(e) {
-    var keyCode = e.keyCode;
-    if (keyCode === 13) {
-      buttonClicked(jiraText.value, ticketPrefix, baseUrl);
-    }
-  }
-});
-
-function buttonClicked(text, ticketPrefix, baseUrl) {
+function buttonClicked(text) {
   if (!ticketPrefix.includes('-')) {
     ticketPrefix = ticketPrefix + '-';
   }
@@ -40,3 +43,5 @@ function buttonClicked(text, ticketPrefix, baseUrl) {
   const newURL = baseUrl + ticket;
   chrome.tabs.create({ url: newURL });
 }
+
+document.addEventListener('DOMContentLoaded', contentLoaded);
